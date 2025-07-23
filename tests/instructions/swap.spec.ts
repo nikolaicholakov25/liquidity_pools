@@ -253,7 +253,7 @@ async function setUpTest() {
   const tokenAMint = createTokenMint({
     context,
     tokenProgram: TOKEN_PROGRAM_ID,
-    decimals: 6,
+    decimals: 9,
   });
   const tokenBMint = createTokenMint({
     context,
@@ -277,13 +277,13 @@ async function setUpTest() {
   await mintTo({
     context,
     ata: creatorTokenAAssociatedAccount,
-    amount: 1_000_000 * 10 ** 9,
+    amount: 100_000_000 * 10 ** 9,
   });
 
   await mintTo({
     context,
     ata: creatorTokenBAssociatedAccount,
-    amount: 1_000_000 * 10 ** 9,
+    amount: 100_000_000 * 10 ** 9,
   });
 
   const isFront = new BN(tokenAMint.toBuffer()).gt(

@@ -8,6 +8,15 @@ use instructions::*;
 
 declare_id!("DEWi9FJQE9tjqvTxPtLiEQ9yyHT7JnR5FXLA3GMpx3Np");
 
+#[cfg(not(target_os = "solana"))]
+mod coverage {
+    use super::*;
+    use anchor_lang::solana_program::program_stubs::{set_syscall_stubs, SyscallStubs};
+    use anchor_lang::solana_program::{entrypoint::ProgramResult, instruction::Instruction};
+    // call coverage macro
+    solana_coverage::anchor_coverage!();
+}
+
 #[program]
 pub mod liquidity_pools {
     use super::*;
