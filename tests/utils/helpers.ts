@@ -13,6 +13,7 @@ import { ProgramTestContext, startAnchor } from "solana-bankrun";
 import IDL from "../../target/idl/liquidity_pools.json";
 import { LiquidityPools } from "../../target/types/liquidity_pools";
 import { Keypair, LAMPORTS_PER_SOL, PublicKey } from "@solana/web3.js";
+import { LiteSVM } from "../../../litesvm/crates/node-litesvm/litesvm";
 
 export const setUpEnv = async () => {
   const context = await startAnchor("", [], []);
@@ -47,7 +48,7 @@ export const createTokenMint = ({
   tokenProgram = TOKEN_PROGRAM_ID,
   publicKey,
 }: {
-  context: ProgramTestContext;
+  context: ProgramTestContext | LiteSVM;
   decimals?: number;
   tokenProgram?: PublicKey;
   publicKey?: PublicKey;
