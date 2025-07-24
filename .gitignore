@@ -6,3 +6,6 @@ target
 node_modules
 test-ledger
 .yarn
+default*
+anchor-test-code-coverage-artifacts
+anchor-test-code-coverage-artifacts/**/*
