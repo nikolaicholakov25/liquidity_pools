@@ -189,6 +189,8 @@ pub fn add_liquidity(
             amount_b_transferred.to_imprecise().unwrap() as u64,
         )?;
 
+        msg!("Transferred token B to pool");
+
         // transfer token A to pool
         transfer_token_to_pool(
             provider,
@@ -198,6 +200,8 @@ pub fn add_liquidity(
             token_program_a,
             amount_a_transferred.to_imprecise().unwrap() as u64,
         )?;
+
+        msg!("Transferred token A to pool");
 
         let lp_amount_by_a = amount_a_transferred
             .checked_mul(&lp_total_supply)
@@ -214,6 +218,8 @@ pub fn add_liquidity(
             .unwrap()
             .to_imprecise()
             .unwrap() as u64;
+
+        msg!("Minted LP tokens");
 
         mint_lp_tokens(
             lp_mint,

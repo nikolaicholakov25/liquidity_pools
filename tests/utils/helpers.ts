@@ -87,7 +87,7 @@ export const createAssociatedTokenAccount = ({
   allowOwnerOffCurve = false,
   tokenProgram = TOKEN_PROGRAM_ID,
 }: {
-  context: ProgramTestContext;
+  context: ProgramTestContext | LiteSVM;
   mint: anchor.web3.PublicKey;
   owner: anchor.web3.PublicKey;
   allowOwnerOffCurve?: boolean;
@@ -133,11 +133,16 @@ export const mintTo = async ({
   ata,
   amount,
 }: {
-  context: ProgramTestContext;
+  context: ProgramTestContext | LiteSVM;
   ata: anchor.web3.PublicKey;
   amount: number;
 }) => {
-  const accountData = await context.banksClient.getAccount(ata);
+  let accountData;
+  if (context instanceof LiteSVM) {
+    accountData = context.getAccount(ata);
+  } else {
+    accountData = await context.banksClient.getAccount(ata);
+  }
   const account = AccountLayout.decode(accountData.data);
 
   // Update the account data
