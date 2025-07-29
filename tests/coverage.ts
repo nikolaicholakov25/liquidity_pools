@@ -370,10 +370,12 @@ describe("instructions::coverage", () => {
     const tokenAMint = createTokenMint({
       context: svm,
       decimals: 9,
+      tokenProgram: TOKEN_PROGRAM_ID,
     });
     const tokenBMint = createTokenMint({
       context: svm,
-      decimals: 9,
+      decimals: 6,
+      tokenProgram: TOKEN_2022_PROGRAM_ID,
     });
 
     // Determine token order (A must be greater than B)
@@ -383,30 +385,36 @@ describe("instructions::coverage", () => {
     let mintA = isFront ? tokenAMint : tokenBMint;
     let mintB = isFront ? tokenBMint : tokenAMint;
 
+    const mintAAccount = svm.getAccount(mintA);
+    const mintBAccount = svm.getAccount(mintB);
+
+    const mintADecoded = MintLayout.decode(mintAAccount.data);
+    const mintBDecoded = MintLayout.decode(mintBAccount.data);
+
     // Create associated token accounts for the pool creator
     const creatorTokenAAssociatedAccount = createAssociatedTokenAccount({
       context: svm,
       mint: mintA,
       owner: poolCreator.publicKey,
-      tokenProgram: TOKEN_PROGRAM_ID,
+      tokenProgram: mintAAccount.owner,
     });
     const creatorTokenBAssociatedAccount = createAssociatedTokenAccount({
       context: svm,
       mint: mintB,
       owner: poolCreator.publicKey,
-      tokenProgram: TOKEN_PROGRAM_ID,
+      tokenProgram: mintBAccount.owner,
     });
 
     await mintTo({
       context: svm,
       ata: creatorTokenAAssociatedAccount,
-      amount: 1_000_000 * 10 ** 9,
+      amount: 1_000_000 * 10 ** mintADecoded.decimals,
     });
 
     await mintTo({
       context: svm,
       ata: creatorTokenBAssociatedAccount,
-      amount: 1_000_000 * 10 ** 9,
+      amount: 1_000_000 * 10 ** mintBDecoded.decimals,
     });
 
     const feeBp = 100; // 1%
@@ -432,10 +440,6 @@ describe("instructions::coverage", () => {
       ],
       program.programId
     );
-
-    // Get mint account info to determine token programs
-    const mintAAccount = svm.getAccount(mintA);
-    const mintBAccount = svm.getAccount(mintB);
 
     // Calculate token vault addresses
     const poolTokenVaultA = getAssociatedTokenAddressSync(
@@ -487,9 +491,13 @@ describe("instructions::coverage", () => {
     );
 
     // test with realistic numbers (random numbers)
-    let amountADesired = new BN(100).mul(new BN(10).pow(new BN(9)));
+    let amountADesired = new BN(533_133).mul(
+      new BN(10).pow(new BN(mintADecoded.decimals))
+    );
     // test with realistic numbers (random numbers)
-    let amountBDesired = new BN(100).mul(new BN(10).pow(new BN(9)));
+    let amountBDesired = new BN(23_414).mul(
+      new BN(10).pow(new BN(mintBDecoded.decimals))
+    );
 
     const { amountA, amountB, amountAMin, amountBMin } =
       calculateOptimalAmounts(
