@@ -90,3 +90,26 @@ pub fn mint_lp_tokens<'info>(
 
     return Ok(());
 }
+
+pub fn burn_lp_tokens<'info>(
+    lp_mint: &mut InterfaceAccount<'info, Mint>,
+    provider_ata_lp: &mut InterfaceAccount<'info, TokenAccount>,
+    provider: &mut Signer<'info>,
+    amount: u64,
+    token_program: &mut Interface<'info, TokenInterface>,
+) -> Result<()> {
+    token_2022::burn_checked(
+        CpiContext::new(
+            token_program.to_account_info(),
+            token_2022::BurnChecked {
+                mint: lp_mint.to_account_info(),
+                from: provider_ata_lp.to_account_info(),
+                authority: provider.to_account_info(),
+            },
+        ),
+        amount,
+        lp_mint.decimals,
+    )?;
+
+    return Ok(());
+}

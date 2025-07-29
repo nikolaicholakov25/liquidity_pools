@@ -42,8 +42,13 @@ pub mod liquidity_pools {
         instructions::add_liquidity(ctx, amount_a, amount_b, amount_a_min, amount_b_min)
     }
 
-    pub fn remove_liquidity(_ctx: Context<RemoveLiquidity>) -> Result<()> {
-        Ok(())
+    pub fn remove_liquidity(
+        ctx: Context<RemoveLiquidity>,
+        lp_amount: u64,
+        amount_a_min: u64,
+        amount_b_min: u64,
+    ) -> Result<()> {
+        instructions::remove_liquidity(ctx, lp_amount, amount_a_min, amount_b_min)
     }
 
     pub fn swap(ctx: Context<Swap>, amount_in: u64, min_amount_out: u64) -> Result<()> {
@@ -57,20 +62,10 @@ pub mod liquidity_pools {
     pub fn update_pool(_ctx: Context<UpdatePool>) -> Result<()> {
         Ok(())
     }
-
-    pub fn claim_rewards(_ctx: Context<ClaimRewards>) -> Result<()> {
-        Ok(())
-    }
 }
-
-#[derive(Accounts)]
-pub struct RemoveLiquidity {}
 
 #[derive(Accounts)]
 pub struct ClaimFees {}
 
 #[derive(Accounts)]
 pub struct UpdatePool {}
-
-#[derive(Accounts)]
-pub struct ClaimRewards {}

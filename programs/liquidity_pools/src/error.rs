@@ -28,4 +28,6 @@ pub enum ErrorCode {
     InsufficientOutputAmount = 12,
     #[msg("Pool has no liquidity")]
     EmptyPool = 13,
+    #[msg("Insufficient LP amount - amount is greater than provider LP balance")]
+    InsufficientLPAmount = 14,
 }

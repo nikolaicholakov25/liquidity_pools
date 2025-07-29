@@ -187,3 +187,33 @@ export function calculateSwapPriceImpact(
 
   return (priceImpact.toNumber() / 1000000) * 100; // Convert to percentage
 }
+
+export function calculateRemoveLiquidityAmounts({
+  lpAmount,
+  lpSupply,
+  reserveA,
+  reserveB,
+  slippageTolerance,
+}: {
+  lpAmount: BN;
+  lpSupply: BN;
+  reserveA: BN;
+  reserveB: BN;
+  slippageTolerance: SlippageToleranceBP;
+}) {
+  const slippageBP = 10000 - slippageTolerance; // Convert BP to remaining percentage
+
+  const minARemoved = lpAmount
+    .mul(new BN(reserveA))
+    .mul(new BN(slippageBP))
+    .div(new BN(lpSupply))
+    .div(new BN(10000));
+
+  const minBRemoved = lpAmount
+    .mul(new BN(reserveB))
+    .mul(new BN(slippageBP))
+    .div(new BN(lpSupply))
+    .div(new BN(10000));
+
+  return { minARemoved, minBRemoved };
+}

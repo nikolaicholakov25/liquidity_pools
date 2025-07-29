@@ -23,9 +23,3 @@ anchor-debug = []
 anchor-lang = { version = "0.31.1", features = ["init-if-needed"] }
 anchor-spl = "0.31.1"
 spl-math = { version = "0.3.0", features = ["no-entrypoint"] }
-
-[dev-dependencies]
-litesvm = "0.6.1"
-solana-program-runtime = "2.2.4"
-solana-program-stubs = "0.1.1"
-solana-program-test = "2.3.5"

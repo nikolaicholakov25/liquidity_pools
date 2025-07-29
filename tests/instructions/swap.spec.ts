@@ -146,6 +146,9 @@ describe("instructions::swap", () => {
       tokensInRaw: amountIn.toNumber(),
       tokensIn: amountIn.div(new BN(10 ** mintADecimals)).toNumber(),
       amountOutMinAfterSlippageRaw: amountOutMinAfterSlippage.toNumber(),
+      amountOutMinAfterSlippage: amountOutMinAfterSlippage
+        .div(new BN(10 ** mintBDecimals))
+        .toNumber(),
       expectedAmountOutRaw: expectedAmountOut.toNumber(),
       expectedAmountOut: expectedAmountOut
         .div(new BN(10 ** mintBDecimals))

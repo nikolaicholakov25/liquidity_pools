@@ -1,5 +1,7 @@
 use crate::error::ErrorCode as CustomErrorCode;
-use crate::helpers::transfer::{mint_lp_tokens, transfer_token_to_pool};
+use crate::helpers::transfer::{
+    burn_lp_tokens, mint_lp_tokens, transfer_token_from_pool, transfer_token_to_pool,
+};
 use crate::state::Pool;
 use anchor_lang::prelude::*;
 use anchor_spl::associated_token::AssociatedToken;
@@ -28,8 +30,7 @@ pub struct RemoveLiquidity<'info> {
     )]
     pub provider_ata_b: InterfaceAccount<'info, TokenAccount>,
     #[account(
-        init_if_needed,
-        payer = provider,
+        mut,
         associated_token::mint = lp_mint,
         associated_token::authority = provider,
         associated_token::token_program = token_program_lp,
@@ -120,13 +121,72 @@ pub fn remove_liquidity(
     require!(lp_amount > 0, CustomErrorCode::MustBeGreaterThanZero);
     require!(amount_a_min > 0, CustomErrorCode::MustBeGreaterThanZero);
     require!(amount_b_min > 0, CustomErrorCode::MustBeGreaterThanZero);
-
-    // Get current pool reserves
-    let reserve_a = pool_ata_a.amount;
-    let reserve_b = pool_ata_b.amount;
+    require!(
+        lp_amount <= provider_ata_lp.amount,
+        CustomErrorCode::InsufficientLPAmount
+    );
 
     // Check pool has liquidity
-    require!(reserve_a > 0 && reserve_b > 0, CustomErrorCode::EmptyPool);
+    require!(
+        pool_ata_a.amount > 0 && pool_ata_b.amount > 0,
+        CustomErrorCode::EmptyPool
+    );
+
+    // Get current pool reserves
+    let reserve_a = PreciseNumber::new(pool_ata_a.amount as u128).unwrap();
+    let reserve_b = PreciseNumber::new(pool_ata_b.amount as u128).unwrap();
+    let lp_amount = PreciseNumber::new(lp_amount as u128).unwrap();
+    let lp_supply = PreciseNumber::new(lp_mint.supply as u128).unwrap();
+
+    // Calculate amount of token A and token B to withdraw based on the LP amount
+    let amount_a = lp_amount
+        .checked_mul(&reserve_a)
+        .unwrap()
+        .checked_div(&lp_supply)
+        .unwrap();
+    let amount_b = lp_amount
+        .checked_mul(&reserve_b)
+        .unwrap()
+        .checked_div(&lp_supply)
+        .unwrap();
+
+    // Validate amounts
+    require!(
+        amount_a.to_imprecise().unwrap() as u64 >= amount_a_min,
+        CustomErrorCode::InsufficientOutputAmount
+    );
+    require!(
+        amount_b.to_imprecise().unwrap() as u64 >= amount_b_min,
+        CustomErrorCode::InsufficientOutputAmount
+    );
+
+    // Transfer tokens from pool to provider
+    transfer_token_from_pool(
+        pool,
+        token_mint_a,
+        pool_ata_a,
+        provider_ata_a,
+        token_program_a,
+        amount_a.to_imprecise().unwrap() as u64,
+    )?;
+
+    transfer_token_from_pool(
+        pool,
+        token_mint_b,
+        pool_ata_b,
+        provider_ata_b,
+        token_program_b,
+        amount_b.to_imprecise().unwrap() as u64,
+    )?;
+
+    // Burn LP tokens
+    burn_lp_tokens(
+        lp_mint,
+        provider_ata_lp,
+        provider,
+        lp_amount.to_imprecise().unwrap() as u64,
+        token_program_lp,
+    )?;
 
     Ok(())
 }
